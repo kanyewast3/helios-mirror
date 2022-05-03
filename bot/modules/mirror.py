@@ -189,7 +189,11 @@ class MirrorListener:
     def onDownloadError(self, error):
         reply_to = self.message.reply_to_message
         if reply_to is not None:
-            reply_to.delete()
+            try:
+                reply_to.delete()
+            except Exception as error:
+                LOGGER.warning(error)
+                pass
         error = error.replace('<', ' ').replace('>', ' ')
         with download_dict_lock:
             try:
@@ -241,7 +245,11 @@ class MirrorListener:
         if AUTO_DELETE_UPLOAD_MESSAGE_DURATION != -1:
             reply_to = self.message.reply_to_message
             if reply_to is not None:
-                reply_to.delete()
+                try:
+                    reply_to.delete()
+                except Exception as error:
+                    LOGGER.warning(error)
+                    pass
             auto_delete_message = int(AUTO_DELETE_UPLOAD_MESSAGE_DURATION / 60)
             if self.message.chat.type == 'private':
                 warnmsg = ''
@@ -369,7 +377,8 @@ class MirrorListener:
                 if self.isZip:
                     try:
                         osremove(f'{DOWNLOAD_DIR}{self.uid}/{name}')
-                    except:
+                    except Exception as error:
+                        LOGGER.warning(error)
                         pass
                 msg = sendMarkup(msg + uploader + pmwarn_mirror + warnmsg, self.bot, self.update, InlineKeyboardMarkup(buttons.build_menu(2)))
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
@@ -392,7 +401,11 @@ class MirrorListener:
     def onUploadError(self, error):
         reply_to = self.message.reply_to_message
         if reply_to is not None:
-            reply_to.delete()
+            try:
+                reply_to.delete()
+            except Exception as error:
+                LOGGER.warning(error)
+                pass
         e_str = error.replace('<', '').replace('>', '')
         with download_dict_lock:
             try:
@@ -424,7 +437,8 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
                     bot, update, reply_markup)
                 Thread(target=auto_delete_upload_message, args=(bot, update.message, message)).start()
                 return
-        except:
+        except Exception as error:
+            LOGGER.warning(error)
             pass
     if isLeech and length_of_leechlog == 0:
         try:
